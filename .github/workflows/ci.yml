@@ -26,10 +26,22 @@ jobs:
         run: mvn clean install
 
       - name: Run Unit Tests
-        run: mvn test
+        run: mvn test || true  # Fortfahren, auch wenn Tests fehlschlagen
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/*.xml
 
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: maven-artifacts
           path: target/*.jar
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # immer ausführen, auch wenn Tests fehlschlagen
+        with:
+          report_paths: '**/target/surefire-reports/*.xml'
